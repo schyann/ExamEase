@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ExamEase</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css'%}">
+
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+
+    <!-- SweetAlert -->
+    <link rel="stylesheet" href="{% static 'plugins/sweetalert/sweetalert.css'%}">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css'%}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css'%}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css'%}">
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+
+<body class="sidebar-mini layout-fixed layout-navbar-fixed text-sm">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-light bg-orange">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a style="color:white;"  class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                 
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+
+                <li class="nav-item dropdown user-menu bg-orange">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <img id="imageS" src="{% static 'images/upload/images.png' %}" alt="User Avatar" style="width:25px;height:25px;" class=" img-circle  ">
+                        <span style="color:white;" class="d-none d-md-inline UserFullname"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <!-- User image -->
+                        <li class="user-header bg-orange">
+                            <img src="{% static 'images/upload/images.png' %}"  class="img-circle elevation-2" alt="User Avatar">
+                            <p style="color:white;" class="UserFullname"></p>
+                        </li>
+                        <li class="user-footer">
+                            <!-- <a href="<?php echo WEB_URL; ?>page/accountsetting.php?Id=<?php echo $_SESSION['objLogin']['UserId']; ?>"
+                                class="btn btn-primary btn-flat float-left">Account Setting</a> -->
+                            <a href="{% url 'signout'%}" class="btn btn-danger btn-flat float-right">Sign out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar elevation-4 sidebar-dark-orange">
+            <!-- Brand Logo -->
+            <a href="index3.html" class="brand-link bg-orange">
+                <img style="margin-left:20px;" src="{% static 'logo.png' %}" alt="ExamEase Logo" class="brand-image " > 
+                {% comment %} <span class="" style="color:white;font-weight: bolder;font-size: 14px;margin-left:10px;"  >ExamEase</span> {% endcomment %}
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <img src="{% static 'images/upload/images.png' %}" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <span style="color:white;"  class="d-block UserFullname" ></span>
+                    </div>
+                </div> 
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+                       
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard'%}" class="nav-link {% if app_url  == 'dashboard' %} active {% endif %}" style="color:white;">
+                                <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'student'%}" class="nav-link {% if app_url  == 'student' %} active {% endif %}" style="color:white;">
+                                <i class="nav-icon fas fa-users"></i><p>Student</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'examination'%}" class="nav-link {% if app_url  == 'examination' %} active {% endif %}" style="color:white;">
+                                <i class="nav-icon fas fa-list-ol"></i><p>Examination</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'examinationResult' %}" class="nav-link {% if app_url  == 'examinationResult' %} active {% endif %}" style="color:white;">
+                                <i class="nav-icon fas fa-font"></i><p>Examination Result</p>
+                            </a>
+                        </li>
+                         
+ 
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>

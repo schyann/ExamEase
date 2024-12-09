@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExamEase | Registration</title>
+    
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">  
+  <link href="{% static 'assets/css/registration-5.css' %}" rel="stylesheet">
+  <link href="{% static 'plugins/toastr/toastr.min.css' %}" rel="stylesheet">
+</head>
+<body>
+  <!-- Registration 10 - Bootstrap Brain Component -->
+<section class="bg-light py-3 py-md-5 py-xl-8">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+          <div class="mb-5">
+            <div class="text-center mb-4">
+              <a href="#!">
+                <img src="{% static 'logo.png' %}" alt="ExamEase Logo" width="175" height="57">
+              </a>
+            </div>
+            <h4 class="text-center mb-4">Registration Form</h4> 
+          </div>
+          <div class="card border border-light-subtle rounded-4">
+            <div class="card-body p-3 p-md-4 p-xl-5">
+              <form method="POST">
+                {% csrf_token %}
+                <!-- <p class="text-center mb-4">Sign Up</p> -->
+                <div class="row gy-3 overflow-hidden">
+                  <div class="col-12">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" name="Firstname" id="Firstname" placeholder="Firstname" required>
+                      <label for="Firstname" class="form-label">Firstname</label>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" name="Lastname" id="Lastname" placeholder="Lastname" required>
+                      <label for="Lastname" class="form-label">Lastname</label>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" name="username" id="username" placeholder="Username" required>
+                      <label for="username" class="form-label">Username</label>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-floating mb-3">
+                      <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                      <label for="password" class="form-label">Password</label>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-floating mb-3">
+                      <input type="password" class="form-control" name="confirm_password" id="confirm_password"  placeholder="Confirm Password" required>
+                      <label for="password" class="form-label">Confirm Password</label>
+                    </div>
+                  </div>
+                  <!-- <div class="col-12"> https://www.youtube.com/watch?v=Le3UfwioL_Q
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="" name="iAgree" id="iAgree" required>
+                      <label class="form-check-label text-secondary" for="iAgree">
+                        I agree to the <a href="#!" class="link-primary text-decoration-none">terms and conditions</a>
+                      </label>
+                    </div>
+                  </div> -->
+                  <div class="col-12">
+                    <div class="d-grid">
+                      <button class="btn btn-primary btn-xs" type="button" id="submit" style="margin-bottom: 5px;">Sign up</button> 
+                      <a href="{% url 'home'%}" class="btn btn-danger btn-xs">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-center mt-4">
+            <p class="m-0 text-secondary text-center">Already have an account? <a href="{% url 'signin'%}" class="link-primary text-decoration-none">Sign in</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="{% static 'plugins/jquery/jquery-3.7.1.min.js' %}"></script>
+  <script src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+<script>
+
+  $('document').ready(function(){
+
+    $('#submit').on('click',function(){
+      var firstname = $('#Firstname').val();
+      var lastname = $('#Lastname').val();
+      var username = $('#username').val();
+      var password = $('#password').val();
+      var confirmpassword = $('#confirm_password').val();
+
+      toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "progressBar": true,
+        "preventDuplicates": false,
+        "positionClass": "toast-top-right",
+        "onclick": null,
+        "showDuration": "400",
+        "hideDuration": "1000",
+        "timeOut": "7000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+
+
+      if (firstname == ''){
+        toastr.error('Firstname is required field.', ' Invalid Input!!');
+        $('#firstName').focus();
+        return;
+      }
+
+      if (lastname == ''){
+        toastr.error('Lastname is required field.', 'Invalid Input!!');
+        $('#lastname').focus();
+        return;
+      }
+
+      if (username == ''){
+        toastr.error('Username is required field.', 'Invalid Input!!');
+        $('#username').focus();
+        return;
+      }
+
+      if (password == ''){
+        toastr.error('Password is required field.', 'Invalid Input!!');
+        $('#password').focus();
+        return;
+      }
+
+      if (confirmpassword == ''){
+        toastr.error('Confirm Password is required field.', 'Invalid Input!!');
+        $('#confirm_password').focus();
+        return;
+      }
+
+      if (password != confirmpassword){
+        toastr.error('Password and Confirm Password does not match', 'Invalid Input!!');
+        $('#password').focus();
+        return;
+      }
+
+      $.ajax({
+        data: {
+          firstname:firstname,
+          lastname:lastname,
+          username:username,
+          password:password,
+          csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+        }, // get the form data
+        url: "{% url 'register' %}",
+        type: 'POST',
+        dataType:'json',
+        // on success
+        success: function(response) {
+         // alert(response.message)
+            if (response.isSave == true) {
+                toastr.success("Successfully Register.","Successfully Saved");
+            //   setTimeout(window.location ="{% url 'signin' %}", 3000);
+                setTimeout(function() {
+                  // Redirect to the new URL
+                  window.location.href = "{% url 'signin' %}";
+              }, 2000);
+            } 
+        },
+        // on error
+        error: function(response) {
+            // alert the error if any error occured
+            toastr.error(response.message)
+        }
+    });
+
+    });
+
+  }); 
+
+  $('#username').keyup(function() {
+    // create an AJAX call
+    $.ajax({
+        data: $(this).serialize(), // get the form data
+        url: "{% url 'validate_username' %}",
+        // on success
+        success: function(response) {
+            if (response.is_taken == true) {
+                $('#usernameError').remove();
+                $('#username').removeClass('is-valid').addClass('is-invalid');
+                $('#username').after('<div class="invalid-feedback d-block" id="usernameError">This username is not available!</div>') 
+                $("#submit").attr('disabled','disabled');
+                
+            } else {
+                $('#username').removeClass('is-invalid').addClass('is-valid');
+                $('#usernameError').remove();
+                $("#submit").removeAttr('disabled');
+            }
+        },
+        // on error
+        error: function(response) {
+            // alert the error if any error occured
+            toastr.error(response.responseJSON.errors)
+        }
+    });
+    return false;
+  });
+
+</script>
+
+</body>
+</html>

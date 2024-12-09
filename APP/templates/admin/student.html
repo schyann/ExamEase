@@ -1,0 +1,416 @@
+{% include "admin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Student Management</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'dashboard'%}">Home</a></li>
+              <li class="breadcrumb-item active">Student Management</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-warning card-outline">
+              <div class="card-header">
+                <h3 class="card-title float-right"> 
+                    <a href="#" class="btn btn-success btn-sm" title="Create" data-toggle="modal" data-target="#modaldefault">Create</a>
+                    <h5 class="pull-left">List of Student</h5>
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                   <div class="col-md-12">
+                     <table id="tbl" class="table table-hover table-bordered  tbl">
+                        <thead>
+                            <tr>
+                                <th>Student Id</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Middlename</th>
+                                <th style="text-align:center;">Action </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                 {% for record in records %}
+                                    <tr>
+                                        <td>{{ record.StudentId }}</td>
+                                        <td>{{ record.Firstname }}</td>
+                                        <td>{{ record.Lastname }}</td>
+                                        <td>{{ record.Middlename }}</td>                                        
+                                        <td style="text-align:center;">
+                                            <a class="btn btn-primary btn-xs" href="#" title="Edit" onclick="GetDetails({{ record.Id }});"> <i class="fas fa-edit"></i> </a>
+                                            <button class="btn btn-xs btn-danger btndelete" id="{{ record.Id }}" > <i class="fas fa-trash"></i> </button> 
+
+            {% comment %} <td><a href="/delete/{{ employee.id }}" class="btn btn-danger">Delete</a></td>     {% endcomment %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+    <!--New Student -->
+    <div class="modal fade" id="modaldefault" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">New Student</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" id="insert_form">
+                {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="Strands">Student Id</label>
+                                    <input type="text" class="form-control" name="StudentId" autocomplete="off" id="StudentId">   
+                                     <div id="StudentIdError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div>                                 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Firstname">Firstname</label>
+                                    <input type="text" class="form-control ProperCase" name="Firstname" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="Firstname">
+                                    <div id="FirstnameError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div>                                  
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Lastname">Lastname</label>
+                                    <input type="text" class="form-control ProperCase" name="Lastname" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="Lastname">
+                                    <div id="LastnameError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Middlename">Middlename</label>
+                                    <input type="text" class="form-control ProperCase" name="Middlename" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="Middlename">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <input type="button" onclick="SubmitStudent()" class="btn btn-info" value="Submit" name="save" id="save" />
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <div class="modal fade" id="modalEdit" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Student</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" id="edit_form">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="hidden" class="form-control" id="IdE" name="IdE" placeholder="Password">
+                                <div class="form-group">
+                                    <label for="Strands">Student Id</label>
+                                    <input type="text" class="form-control" name="StudentIdE" autocomplete="off" id="StudentIdE">         
+                                    <div id="StudentIdEError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div>                            
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Firstname">Firstname</label>
+                                    <input type="text" class="form-control ProperCase" name="FirstnameE" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="FirstnameE">
+                                    <div id="FirstnameEError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Lastname">Lastname</label>
+                                    <input type="text" class="form-control ProperCase" name="LastnameE" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="LastnameE">
+                                    <div id="LastnameEError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Middlename">Middlename</label>
+                                    <input type="text" class="form-control ProperCase" name="MiddlenameE" onkeypress="return CheckIsCharacter(event);" autocomplete="off" id="MiddlenameE">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <!--<button type="button" class="btn btn-info"  onclick="SubmitUser()">Save -->
+                        <input type="button" onclick="EditStudent()" class="btn btn-info" value="Submit" name="save" id="save" />
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+
+{% include "admin/footer.html" %}   
+<script>
+    // Initialize DataTables on the table with id 'myTable'
+    $(document).ready( function () { 
+        $('#tbl').DataTable({
+            "paging": true,
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],  // options for number of records per page
+            "pageLength": 10,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": true,
+            "responsive": true,
+        }); 
+    });
+
+    function SubmitStudent() { 
+        var StudentId = $("#StudentId").val();
+        var Firstname = $("#Firstname").val();
+        var Lastname = $("#Lastname").val();
+        var Middlename = $("#Middlename").val();
+        var UserId = sessionStorage.getItem("userId");
+
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "progressBar": true,
+            "preventDuplicates": false,
+            "positionClass": "toast-top-right",
+            "onclick": null,
+            "showDuration": "400",
+            "hideDuration": "1000",
+            "timeOut": "7000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+
+        if (StudentId == "") {
+            $('#StudentIdError').removeAttr('style');
+            $('#StudentId').addClass('is-invalid');
+            $("#StudentId").focus();
+            return;
+        } else {
+            $('#StudentIdError').attr('style', 'display:none;');
+            $('#StudentId').removeClass('is-invalid');
+        }
+
+        if (Firstname == "") {
+            $('#FirstnameError').removeAttr('style');
+            $('#Firstname').addClass('is-invalid');
+            $("#Firstname").focus();
+            return;
+        } else {
+            $('#FirstnameError').attr('style', 'display:none;');
+            $('#Firstname').removeClass('is-invalid');
+        }
+
+        if (Lastname == "") {
+            $('#LastnameError').removeAttr('style');
+            $('#Lastname').addClass('is-invalid');
+            $("#Lastname").focus();
+            return;
+        }else {
+            $('#LastnameError').attr('style', 'display:none;');
+            $('#Lastname').removeClass('is-invalid');
+        }
+
+
+
+        $.ajax({
+            url: "{% url 'saveStudent' %}",
+            type: "POST",
+            data: {
+                StudentId:StudentId,
+                Firstname:Firstname,
+                Lastname:Lastname,
+                Middlename:Middlename,
+                UserId:UserId,
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) { 
+                if (response.isSave == true) { 
+
+                    swal({
+                        title: "Saved!",
+                        text: "Successfully Saved!",
+                        type: "success",
+                        timer: 2000
+                    });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+    }
+
+    function GetDetails(Id) {        
+        $.ajax({
+            url: `/getStudent/${Id}/`,  // Make sure this matches your URL pattern
+            type: 'GET',
+            success: function(data) {
+                console.log("Record Data:", data);
+                document.getElementById("IdE").value = data.Id;
+                document.getElementById("StudentIdE").value = data.StudentId;
+                document.getElementById("FirstnameE").value = data.Firstname;
+                document.getElementById("LastnameE").value = data.Lastname;
+                document.getElementById("MiddlenameE").value = data.Middlename;
+                $('#modalEdit').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching record:", error);
+            }
+        });
+    }
+
+    function EditStudent() {
+        var Id = $("#IdE").val();
+        var StudentId = $("#StudentIdE").val();
+        var Firstname = $("#FirstnameE").val();
+        var Lastname = $("#LastnameE").val();
+        var Middlename = $("#MiddlenameE").val();
+        var UserId = sessionStorage.getItem("userId");
+
+        if (StudentId == "") {
+            $('#StudentIdEError').removeAttr('style');
+            $('#StudentIdE').addClass('is-invalid');
+            $("#StudentIdE").focus();
+            return;
+        }else {
+            $('#StudentIdEError').attr('style', 'display:none;');
+            $('#StudentIdE').removeClass('is-invalid');
+        }
+        
+        if (Firstname == "") {
+            $('#FirstnameEError').removeAttr('style');
+            $('#FirstnameE').addClass('is-invalid');
+            $("#FirstnameE").focus();
+            return;
+        }else {
+            $('#FirstnameEError').attr('style', 'display:none;');
+            $('#FirstnameE').removeClass('is-invalid');
+        }
+
+        if (Lastname == "") {
+            $('#LastnameEError').removeAttr('style');
+            $('#LastnameE').addClass('is-invalid');
+            $("#LastnameE").focus();
+            return;
+        }else {
+            $('#LastnameEError').attr('style', 'display:none;');
+            $('#LastnameE').removeClass('is-invalid');
+        }
+
+
+        $.ajax({
+            url: `/updateStudent/${Id}/`,  
+            method: "POST",
+            data: {
+                StudentId:StudentId,
+                Firstname:Firstname,
+                Lastname:Lastname,
+                Middlename:Middlename,
+                UserId:UserId,
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                 //console.log(response);
+              
+                if (response.isSave == true) { 
+                    swal({
+                        title: "Updated!",
+                        text: "Successfully Updated!",
+                        type: "success"
+                    });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+    }
+       
+    $(document).on('click', '.btndelete', function(e){
+        var Id = $(this).attr('id'); 
+
+        swal({
+            title: "Are you sure you want to delete this record?",
+            text: "ARE YOU SURE YOU WANT TO CONTINUE?",
+            type: "error",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function(isConfirm) {
+            if (isConfirm) {
+
+                $.ajax({
+                    url: `/deleteStudent/${Id}/`,  
+                    method:"GET", 
+                    success: function(response) { 
+                        if (response.isSave == true) {  
+                            swal({
+                                title: "Deleted!",
+                                text: "Successfully Deleted!",
+                                type: "success",
+                                timer: 2000
+                            });                             
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        }
+                    } 
+                });
+            } else { 
+                swal({
+                    title: "Saved!",
+                    timer:1
+                });
+            }
+        });
+
+    });  
+   
+ </script>
+

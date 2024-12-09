@@ -1,0 +1,319 @@
+{% include "admin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Examination Management</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'dashboard'%}">Home</a></li>
+              <li class="breadcrumb-item active">Examination Management</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1"><i class="fas fa-list-ol"></i></span>
+
+              <div class="info-box-content">
+                <h3 id="examId">Examination ID :</h3>                 
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card card-warning card-outline">
+              <div class="card-header">
+                <h3 class="card-title float-right"> 
+                    {% comment %} <a href="#" class="btn btn-success btn-sm" title="Create" data-toggle="modal" data-target="#modaldefault">Create</a> {% endcomment %}
+                    <h5 class="pull-left">List of Student</h5>
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                   <div class="col-md-12">
+                     <table id="tbl" class="table table-hover table-bordered  tbl">
+                        <thead>
+                            <tr>
+                                <th>Student Id</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Middlename</th>
+                                <th style="text-align:center;">Action </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                 {% for Students  in excludedstudents  %}
+                                    <tr>
+                                        <td>{{ Students.StudentId }}</td>
+                                        <td>{{ Students.Firstname }}</td>
+                                        <td>{{ Students.Lastname }}</td>
+                                        <td>{{ Students.Middlename }}</td>                                        
+                                        <td style="text-align:center;">
+                                             <button class="btn btn-xs btn-danger btnAdd" id="{{ Students.Id }}" > <i class="fas fa-arrow-right"></i> </button>  
+                                    {%csrf_token%}
+            {% comment %} <td><a href="/delete/{{ employee.id }}" class="btn btn-danger">Delete</a></td>     {% endcomment %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+
+            <div class="col-md-6">
+                <div class="card card-danger card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title float-right"> 
+                            {% comment %} <a href="#" class="btn btn-success btn-sm" title="Create" data-toggle="modal" data-target="#modaldefault">Create</a> {% endcomment %}
+                            <h5 class="pull-left">List of Examinee</h5>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                            <table id="tbl1" class="table table-hover table-bordered  tbl">
+                                <thead>
+                                    <tr>
+                                        <th>Student Id</th>
+                                        <th>Firstname</th>
+                                        <th>Lastname</th>
+                                        <th>Middlename</th>
+                                        <th style="text-align:center;">Action</th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                      {% for Students  in studentsExam  %}
+                                          <tr>
+                                              <td>{{ Students.StudentId }}</td>
+                                              <td>{{ Students.Firstname }}</td>
+                                              <td>{{ Students.Lastname }}</td>
+                                              <td>{{ Students.Middlename }}</td>                                        
+                                              <td style="text-align:center;">
+                                                  <button class="btn btn-xs btn-danger btnRemove" id="{{ Students.StudentId }}" > <i class="fas fa-arrow-left"></i> </button> 
+                                          {%csrf_token%}
+                  {% comment %} <td><a href="/delete/{{ employee.id }}" class="btn btn-danger">Delete</a></td>     {% endcomment %}
+                                              </td>
+                                          </tr>
+                                      {% endfor %}   
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+ 
+
+{% include "admin/footer.html" %}   
+<script>
+    const url = window.location.pathname;  
+    const lastPart = url.substring(url.lastIndexOf('/') -5);
+    const result = lastPart.slice(0, -1);
+    // Initialize DataTables on the table with id 'myTable'
+    $(document).ready( function () { 
+        
+        document.getElementById('examId').innerHTML= "Examination ID : "+result; 
+
+        $('.tbl').DataTable({
+            "paging": true,
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],  // options for number of records per page
+            "pageLength": 10,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": true,
+            "responsive": true,
+        }); 
+    });
+
+    function SubmitStudent() {
+
+        var StudentId = $("#StudentId").val();
+        var Firstname = $("#Firstname").val();
+        var Lastname = $("#Lastname").val();
+        var Middlename = $("#Middlename").val();
+        var UserId = sessionStorage.getItem("userId");
+
+        if (StudentId == "") {
+            toastr.error('Please Enter Student Id', 'Invalid Input!!!')
+            $("#StudentId").focus();
+            return;
+        }
+        if (Firstname == "") {
+            toastr.error('Please Enter Firstname.', 'Invalid Input!!!')
+            $("#Firstname").focus();
+            return;
+        }
+        if (Lastname == "") {
+            toastr.error('Please Enter Lastname.', 'Invalid Input!!!')
+            $("#Lastname").focus();
+            return;
+        }
+        if (Middlename == "") {
+            toastr.error('Please Enter Middlename.', 'Invalid Input!!!')
+            $("#Middlename").focus();
+            return;
+        }
+        
+        $.ajax({
+            url: "{% url 'saveStudent' %}",
+            type: "POST",
+            data: {
+                StudentId:StudentId,
+                Firstname:Firstname,
+                Lastname:Lastname,
+                Middlename:Middlename,
+                UserId:UserId,
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) { 
+                if (response.isSave == true) { 
+
+                    swal({
+                        title: "Saved!",
+                        text: "Successfully Saved!",
+                        type: "success",
+                        timer: 2000
+                    });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+    }
+
+    function GetDetails(Id) {        
+        $.ajax({
+                url: `/getStudent/${Id}/`,  // Make sure this matches your URL pattern
+                type: 'GET',
+                success: function(data) {
+                    console.log("Record Data:", data);
+                    document.getElementById("IdE").value = data.Id;
+                    document.getElementById("StudentIdE").value = data.StudentId;
+                    document.getElementById("FirstnameE").value = data.Firstname;
+                    document.getElementById("LastnameE").value = data.Lastname;
+                    document.getElementById("MiddlenameE").value = data.Middlename;
+                    $('#modalEdit').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching record:", error);
+                }
+            });
+    }
+
+   
+      document.querySelectorAll("#tbl .btnAdd").forEach(button => {
+        button.addEventListener("click", function () {
+            const row = this.closest("tr");
+            var Id = $(this).attr('id'); 
+            const rowData = Array.from(row.cells).map(cell => cell.textContent);
+            var student=rowData[0];
+            var fullname=rowData[1]+" "+rowData[2]+" " +rowData[3];
+
+            $.ajax({
+              url: "{% url 'saveExaminee' %}",  
+              type:"POST", 
+              data:{
+                  Student_Id:Id,
+                  ExaminationMain_id:result,
+                  StudentIdNo:student,
+                  Fullname:fullname, 
+                  csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+              },
+              success: function(response) {                     
+                  if (response.isSave == true) {
+                      location.reload();
+                      // Clone the row without the button cell
+                      // const clonedRow = row.cloneNode(true);
+                      // clonedRow.deleteCell(clonedRow.cells.length - 1); // Remove last cell (button)
+                      // Append cloned row to the destination table
+                        // Get the first row in table2 and hide it
+                    //  const firstRowInTable2 = document.querySelector("#tbl1 tbody tr");
+                    //  if (firstRowInTable2) {
+                    //      firstRowInTable2.style.display = "none"; // Hide the first row in table2
+                    //   }
+                    //  document.querySelector("#tbl1 tbody").appendChild(clonedRow);
+
+                      //row.remove();
+                  }                   
+              } 
+            });
+        });
+      });
+
+    $(document).on('click', '.btnRemove', function(e){
+        var Id = $(this).attr('id'); 
+
+        swal({
+            title: "Are you sure you want to delete this record?",
+            text: "ARE YOU SURE YOU WANT TO CONTINUE?",
+            type: "error",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function(isConfirm) {
+            if (isConfirm) {
+
+                $.ajax({
+                    url: `/deleteStudentExam/${Id}/${result}/`,  
+                    method:"GET", 
+                    success: function(response) { 
+                        if (response.isSave == true) {  
+                            swal({
+                                title: "Deleted!",
+                                text: "Successfully Deleted!",
+                                type: "success",
+                                timer: 2000
+                            });                             
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        }
+                    } 
+                });
+            } else { 
+                swal({
+                    title: "Saved!",
+                    timer:1
+                });
+            }
+        });
+
+    }); 
+
+ </script>
+

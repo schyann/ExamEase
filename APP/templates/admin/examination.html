@@ -1,0 +1,989 @@
+{% load static %}
+{% include "admin/header.html" %}
+<style>
+	#loading {
+	  position: fixed;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  width: 100%;
+	  height: 100%;
+	  top: 0;
+	  left: 0;
+	  opacity: 0.7;
+	  background-color: #fff;
+	  z-index: 1000;
+	}
+
+	#loading-image {
+	  width: 100%;
+	  height: 100%;
+	  z-index: 1000;
+	}
+</style>
+  <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <div class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0">Examination Management</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">Examination Management</li>
+              </ol>
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+      </div>
+      <!-- /.content-header -->
+
+      <!-- Main content -->
+      <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                 <div class="col-lg-12">
+                    <div id="loading" style="display:none;">
+					  <img id="loading-image" src="{% static '/images/loading1.gif' %}" alt="Loading..." />
+					</div> 
+                    <section>              
+                </div>
+            </div>
+            <div class="row">
+               
+                <div class="col-lg-4">            
+                    <div class="card card-warning card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title float-right"> 
+                                {% comment %} <a href="#" class="btn btn-success btn-sm" title="Create" data-toggle="modal" data-target="#modalExam">Create</a> {% endcomment %}
+                                <button class="btn btn-primary btnCreate" id="btnCreate" > Create </button> 
+                                {%csrf_token%}
+                                <h5 class="pull-left">List of Examination</h5>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <table id="tblExam" class="table table-hover table-bordered tbl">
+                                <thead>
+                                    <tr>
+                                        <th>Examination Id</th> 
+                                        <th style="text-align:center;">Action</th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for record in records %}
+                                            <tr>
+                                                <td onclick="GetDetails({{ record.ExaminationId }});" >{{ record.ExaminationId }}</td>    
+                                                <td style="text-align:center;">
+                                                    <a class="btn btn-primary btn-xs" href="examinationDetail/{{ record.ExaminationId }}/" title="Edit" > <i class="fas fa-edit"></i> </a> 
+                                                    <button class="btn btn-xs btn-danger btnDeleteExam" id="{{ record.Id }}" > <i class="fas fa-trash"></i> </button>
+                                                </td>                               
+                                            </tr>
+                                        {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!-- /.card -->
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title float-right"> 
+                                <button id="btnUpload" disabled class="btn btn-success btn-sm" title="Create" data-toggle="modal" data-target="#modalAnswerKey">Create</button> 
+                                <h5 class="pull-left">List of Answer Key</h5>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="tblAnswer" class="table table-hover table-bordered tbl">
+                                        <thead>
+                                            <tr>
+                                                <th>Item No.</th>
+                                                <th>Answer</th>
+                                                <th style="text-align:center;">Action </th> 
+                                            </tr>
+                                        </thead>
+                                        <tbody> </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card card-danger card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title float-right"> 
+                                <button disabled class="btn btn-primary btn-sm btnCreatePDF" title="Create Answer Sheet">Create Answer Sheet</button> 
+                                <button id="btnUploadAnsSheet" disabled class="btn btn-success btn-sm" title="Upload Answer Sheet" data-toggle="modal" data-target="#modaldefault">Upload Answer Sheet</button> 
+                                <h5 class="pull-left">List of Examinee</h5>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="tbl1" class="table table-hover table-bordered tbl">
+                                        <thead>
+                                            <tr>
+                                                <th>Student Id</th>
+                                                <th>Fullname</th>
+                                                {% comment %} <th style="text-align:center;">Action </th> {% endcomment %}
+                                            </tr>
+                                        </thead>
+                                            <tbody> </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+
+            </div>
+          <!-- /.row -->
+        </div><!-- /.container-fluid -->
+      </div>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!--Upload Answer key--> 
+    <div class="modal fade" id="modalAnswerKey" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="HeaderExam">Answer Key</h4>
+                    <input type="hidden" name="examID" id="examID"/>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" id="uploadForm1">
+                {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <div class="form-group">
+                                    <label for="Item No">Item No. :</label>
+                                    <select class="select2 form-control" id="ItemNo" name="ItemNo" >
+                                        <option value=""></option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>                                        
+                                        <option value="21">21</option>
+                                        <option value="22">22</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>                                        
+                                        <option value="31">31</option>
+                                        <option value="32">32</option>
+                                        <option value="33">33</option>
+                                        <option value="34">34</option>
+                                        <option value="35">35</option>
+                                        <option value="36">36</option>
+                                        <option value="37">37</option>
+                                        <option value="38">38</option>
+                                        <option value="39">39</option>
+                                        <option value="40">40</option>
+                                        <option value="41">41</option>
+                                        <option value="42">42</option>
+                                        <option value="43">43</option>
+                                        <option value="44">44</option>
+                                        <option value="45">45</option>
+                                        <option value="46">46</option>
+                                        <option value="47">47</option>
+                                        <option value="48">48</option>
+                                        <option value="49">49</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <div id="ItemNoError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Answer">Answer :</label>
+                                    <select class="select2 form-control" id="Answer" name="Answer" >
+                                        <option value=""></option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option> 
+                                    </select>
+                                    <div id="AnswerError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <input  type="button" onclick="submitAnswer()" class="btn btn-info" value="Submit" name="save" id="save" />
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>  
+
+     <!--Upload Answer key--> 
+    <div class="modal fade" id="modalAnswerKeyEdit" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="HeaderExam">Answer Key</h4>
+                    <input type="hidden" name="examIDE" id="examIDE"/>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" id="uploadFormEdit">
+                {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <div class="form-group">
+                                    <label for="Item No">Item No. :</label>
+                                    <select class="select2 form-control" id="ItemNoE" name="ItemNoE" >
+                                        <option value=""></option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>                                        
+                                        <option value="21">21</option>
+                                        <option value="22">22</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>                                        
+                                        <option value="31">31</option>
+                                        <option value="32">32</option>
+                                        <option value="33">33</option>
+                                        <option value="34">34</option>
+                                        <option value="35">35</option>
+                                        <option value="36">36</option>
+                                        <option value="37">37</option>
+                                        <option value="38">38</option>
+                                        <option value="39">39</option>
+                                        <option value="40">40</option>
+                                        <option value="41">41</option>
+                                        <option value="42">42</option>
+                                        <option value="43">43</option>
+                                        <option value="44">44</option>
+                                        <option value="45">45</option>
+                                        <option value="46">46</option>
+                                        <option value="47">47</option>
+                                        <option value="48">48</option>
+                                        <option value="49">49</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <div id="ItemNoEError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Answer">Answer :</label>
+                                    <select class="select2 form-control" id="AnswerE" name="AnswerE" >
+                                        <option value=""></option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option> 
+                                    </select>
+                                    <div id="AnswerEError" style="display:none;"><b style="color:red;">Please fill out this field.</b></div> 
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <input id="btnEditAns" type="button" onclick="submitAnswerEdit()" class="btn btn-info" value="Submit" name="save" id="save" />
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+  
+
+    <!--Upload Answer sheet--> 
+    <div class="modal fade" id="modaldefault" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Upload Answer Sheet</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <input required type="file" id="image" name="image" accept="image/*" class="form-control"> 
+                                 <div id="result"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default pull-left" id="modalClose" data-dismiss="modal">Close</button>
+                        <input  type="submit" class="btn btn-info" value="Submit" name="save" id="save" />
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    
+
+    
+
+{% include "admin/footer.html" %}  
+<script>
+
+    var Examinationid = 0;
+    $(document).ready( function () { 
+
+        let lastClickedRow = null; // To store the last clicked row
+
+        // Select all rows in the table
+        const rows = document.querySelectorAll("#tblExam tr");
+
+        // Loop through each row and add a click event listener
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                // If there's a previously clicked row, reset its color
+                if (lastClickedRow) {
+                lastClickedRow.style.backgroundColor = ""; // Reset to default color
+                }
+
+                // Change the background color of the clicked row
+                row.style.backgroundColor = "lightblue";
+                // Get the innerHTML of the first cell and display it
+                Examinationid = row.cells[0].innerHTML;
+                //alert(firstColumnContent)
+                // Update lastClickedRow to the currently clicked row
+                document.getElementById('HeaderExam').innerHTML = "Examination ID : "+Examinationid
+                document.getElementById('examID').value = Examinationid
+                lastClickedRow = row;
+                $('#btnUpload').removeAttr('disabled');
+            });
+        });
+
+        $('#tblExam').DataTable({
+            "paging": true,
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],  // options for number of records per page
+            "pageLength": 10,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": true,
+            "responsive": true,
+        }); 
+    });
+
+    // Handle form submission with AJAX
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        document.body.style.cursor = "wait";
+        $('#loading').removeAttr('style'); 
+        $('#modaldefault').modal('toggle'); 
+        $('#save').attr('disabled','disabled');
+        $.ajax({
+            url: "{% url 'upload_image' %}",  // Django URL for image upload
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                
+                console.log('Image : '+response.file_name)
+                if (response.success) {
+                    scanSheet(response.file_name)
+                    
+                    // Display the uploaded image
+                  //  $('#result').html('<p>Image uploaded successfully!</p><img src="' + response.image_url + '" alt="Uploaded Image" width="200">');
+                } else {
+                 //   $('#result').html('<p>Error: ' + response.error + '</p>');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#result').html('<p>An error occurred: ' + error + '</p>');
+            }
+        });
+        
+        //$('#modaldefault').modal('toggle');
+      /*  setInterval(function() {
+            location.reload();
+        }, 3000);*/
+    });
+
+    function scanSheet(file_name){ 
+         $.ajax({
+            url: "{% url 'scan_paper' %}",  // Django URL for image upload
+            type: "POST",
+            data: {
+                image:file_name,
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                let data = JSON.parse(response);
+                console.log(data)
+                if(data == null || data.code[0]==null || data.code[0] < 0){                     
+                        document.body.style.cursor = "default";
+                        $('#loading').attr('style','display: none;')
+                    swal({
+                        title: "Invalid Image!",
+                        text: "Please upload valid image again. Thank you!",
+                        type: "error",
+                        timer: 2000
+                    }); 
+
+                    return;
+                }
+
+                var codeToSplit = data.code[0].split(' ');
+                var studentName = "";
+                var cSplitLength = codeToSplit.length;
+                for(i = 1; i < cSplitLength; i++){
+                    studentName = studentName + " " + codeToSplit[i];
+                }
+
+                var studentId = codeToSplit[0];
+                // var examId = codeToSplit[1];
+                //var studentName = codeToSplit[i]+" "+codeToSplit[i];
+                var score = 0;
+                var trLength = $('#tblAnswer tbody tr').length;
+
+                var answers = [];
+                var answerCounter = 0;
+                var answerkey = [];
+                var checkingCounter = 0;
+                //console.log(trLength);
+                $.each(data.answer, function(k,v){
+                    if(answerCounter < trLength){
+                        answers.push(v);
+                        answerCounter = answerCounter + 1;
+                    } 
+                });
+
+                $('#tblAnswer tbody tr').each(function (k,v){
+                    answerkey.push(v.cells[1].innerHTML);
+                    if(answerkey[checkingCounter] == answers[checkingCounter])
+                        score = score + 1;
+                    
+                    checkingCounter = checkingCounter + 1;
+                })
+
+                
+                console.log("Exam Id :"+studentId);
+                console.log("Student Id :"+studentId);
+                console.log("Student Name :"+studentName);
+                console.log('ANSWERS: ' + answers);
+                console.log('ANSWER KEYS: ' + answerkey);
+                console.log('Items = ' + trLength); 
+                console.log('Score = ' + score);   
+                  
+                $.ajax({
+                url: "{% url 'saveResult' %}",  // Django URL for image upload
+                type: "POST",
+                data: {
+                    ExaminationId:$('#examID').val(),
+                    StudentIdNo:studentId,
+                    Fullname:studentName,
+                    Items:trLength,
+                    Score:score,
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+                }, 
+                success: function(response) {
+                    console.log(response)
+                    if (response.isSave) {
+                        
+                        document.body.style.cursor = "default";
+                        $('#loading').attr('style','display: none;')
+                         swal({
+                                title: "Saved!",
+                                text: "Successfully Saved!",
+                                type: "success",
+                                timer: 2000
+                            });
+                            /*setTimeout(function() {
+                                location.reload();
+                            }, 3000);*/
+                            
+                        // Display the uploaded image
+                    //  $('#result').html('<p>Image uploaded successfully!</p><img src="' + response.image_url + '" alt="Uploaded Image" width="200">');
+                    } else {
+                    //   $('#result').html('<p>Error: ' + response.error + '</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#result').html('<p>An error occurred: ' + error + '</p>');
+                }
+            });
+
+            
+
+            },
+            error: function(xhr, status, error) {
+                $('#result').html('<p>An error occurred: ' + error + '</p>');
+            }
+         })
+    }
+
+    function saveResult(){
+        $.ajax({
+            url: "{% url 'saveResult' %}",  // Django URL for image upload
+            type: "POST",
+            data: {
+
+            }, 
+            success: function(response) {
+                if (response.success) {
+                    scanSheet()
+                    // Display the uploaded image
+                  //  $('#result').html('<p>Image uploaded successfully!</p><img src="' + response.image_url + '" alt="Uploaded Image" width="200">');
+                } else {
+                 //   $('#result').html('<p>Error: ' + response.error + '</p>');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#result').html('<p>An error occurred: ' + error + '</p>');
+            }
+        });
+    }
+
+    function getRandomFiveDigitNumber() {
+        return Math.floor(Math.random() * 90000) + 10000;
+    }
+
+    $(document).on('click', '.btnCreate', function(e){  
+        var examId =getRandomFiveDigitNumber();
+        swal({
+            title: "Are you sure you want to create new Examination?",
+            text: "ARE YOU SURE YOU WANT TO CONTINUE?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonClass: "btn-success",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function(isConfirm) {
+            if (isConfirm) {
+
+                $.ajax({
+                    url: `examinationMain`,  
+                    method:"POST", 
+                    data: {
+                        ExaminationId:examId,
+                        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) { 
+                        if (response.isSave == true) {  
+                            swal({
+                                title: "Created!",
+                                text: "Successfully Created!",
+                                type: "success",
+                                timer: 2000
+                            });                             
+                            setTimeout(function() {      
+                                var url =`examinationDetail/${examId}/`                          
+                                window.location.href = url; 
+                            }, 1000);
+                        }
+                    } 
+                });
+            } else { 
+                swal({
+                    title: "Saved!",
+                    timer:1
+                });
+            }
+        });
+
+    }); 
+
+    $(document).on('click', '.btnCreatePDF', function(e){  
+        var id=$(this).attr('id');
+        document.body.style.cursor = "wait";
+        $('#loading').removeAttr('style'); 
+        $.ajax({
+            url: `createPaper/${id}/`, 
+            method:"GET",  
+            success: function(response) {  
+                swal({
+                    title: "Created!",
+                    text: "Successfully Created!",
+                    type: "success",
+                    timer: 2000
+                });                             
+                 
+                document.body.style.cursor = "default";
+                $('#loading').attr('style','display:none;');
+            } 
+        });
+    }); 
+
+    function GetDetailsAns(Id){            
+        $('#modalAnswerKeyEdit').modal('show');
+
+        var itemSelected = $('#btnEdit-'+Id).data('item');
+        var answerSelected = $('#btnEdit-'+Id).data('answer');
+        console.log('ITEM = ' + itemSelected);
+        console.log('ANSWER = ' + answerSelected);
+
+        $('#ItemNoE').val(itemSelected).change();
+        $('#AnswerE').val(answerSelected).change(); 
+
+        $('#btnEditAns').attr("onclick","editAnswer("+Id+")")
+
+    }
+
+    function editAnswer(Id){
+      
+        var ItemNo = $("#ItemNoE").val();
+        var Answer = $("#AnswerE").val(); 
+
+        if (ItemNo == "") {
+            $('#ItemNoEError').removeAttr('style');
+            $('#ItemNoE').addClass('is-invalid');
+            $("#ItemNoE").focus();
+            return;
+        } else {
+            $('#ItemNoEError').attr('style', 'display:none;');
+            $('#ItemNoE').removeClass('is-invalid');
+        }
+
+        if (Answer == "") {
+            $('#AnswerEError').removeAttr('style');
+            $('#AnswerE').addClass('is-invalid');
+            $("#AnswerE").focus();
+            return;
+        } else {
+            $('#AnswerEError').attr('style', 'display:none;');
+            $('#AnswerE').removeClass('is-invalid');
+        } 
+
+        $.ajax({
+            url: `/updateAnswer/${Id}/`,  
+            method: "POST",
+            data: {
+                Item:ItemNo,
+                Answer:Answer, 
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                 //console.log(response);
+              
+                if (response.isSave == true) { 
+                    swal({
+                        title: "Updated!",
+                        text: "Successfully Updated!",
+                        type: "success"
+                    });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+
+    }
+ 
+    function GetDetails(Id) {     
+        $.ajax({
+            url: `getExaminee/${Id}/`,  // Make sure this matches your URL pattern
+            type: 'GET',
+            success: function(data) { 
+                console.log("Record Data:", data); 
+
+                const tableBody = document.getElementById('tbl1').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; // Clear existing data
+                $.each(data, function(index,record){
+                    $('#tbl1 tbody').append('<tr><td>'+ record.StudentIdNo +'</td><td>'+ record.Fullname +'</td></tr>')
+                })
+
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching record:", error);
+            }
+        });
+
+        const rows = document.querySelectorAll("#tblExam tr");
+        var ExamId=0;
+        var count = 0;
+        // Loop through each row and add a click event listener
+        rows.forEach(row => {
+            row.addEventListener("click", () => {               
+                ExamId = row.cells[0].innerHTML;
+                //btnCreatePDF
+                $('.btnCreatePDF').attr('id',ExamId);
+                $.ajax({
+                    url: `getanswerKey/${ExamId}/`,  // Make sure this matches your URL pattern
+                    type: 'GET',
+                    success: function(data) {       
+                                          //console.log("Record Data:", data);  
+
+                        const tableBody = document.getElementById('tblAnswer').getElementsByTagName('tbody')[0];
+                        tableBody.innerHTML = ''; // Clear existing data
+                        $.each(data, function(index,record){
+                            count =+ 1;
+                            $('#tblAnswer tbody').append('<tr><td>'+ record.Item +'</td><td>'+ record.Answer +'</td><td style="text-align:center;"><a class="btn btn-primary btn-xs btnEdit" href="#" title="Edit" data-item="'+record.Item+'" id="btnEdit-'+record.Id+'" data-answer="'+record.Answer+'" onclick="GetDetailsAns('+ record.Id +');"> <i class="fas fa-edit"></i> </a> <button class="btn btn-xs btn-danger btndeleteAns" id="'+ record.Id +'" > <i class="fas fa-trash"></i> </button> </td></tr>')
+                        })
+
+                        if (count > 0){
+                            $('.btnCreatePDF').removeAttr('disabled');
+                            $('#btnUploadAnsSheet').removeAttr('disabled');
+                        }else{                            
+                            $('.btnCreatePDF').attr('disabled','disabled');
+                            $('#btnUploadAnsSheet').attr('disabled','disabled');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching record:", error);
+                    }
+                });
+                //$('#btnUpload').removeAttr('disabled');
+            });
+        });       
+    }
+
+    $('#tblAnswer').DataTable({
+        "paging": true,
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],  // options for number of records per page
+        "pageLength": 10,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": true,
+        "responsive": true,
+    });
+
+    $('#tbl1').DataTable({
+        "paging": true,
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],  // options for number of records per page
+        "pageLength": 10,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": true,
+        "responsive": true,
+    });
+
+    function submitAnswer() { 
+        var ItemNo = $("#ItemNo").val();
+        var Answer = $("#Answer").val(); 
+
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "progressBar": true,
+            "preventDuplicates": false,
+            "positionClass": "toast-top-right",
+            "onclick": null,
+            "showDuration": "400",
+            "hideDuration": "1000",
+            "timeOut": "7000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+
+        if (ItemNo == "") {
+            $('#ItemNoError').removeAttr('style');
+            $('#ItemNo').addClass('is-invalid');
+            $("#ItemNo").focus();
+            return;
+        } else {
+            $('#ItemNoError').attr('style', 'display:none;');
+            $('#ItemNo').removeClass('is-invalid');
+        }
+
+        if (Answer == "") {
+            $('#AnswerError').removeAttr('style');
+            $('#Answer').addClass('is-invalid');
+            $("#Answer").focus();
+            return;
+        } else {
+            $('#AnswerError').attr('style', 'display:none;');
+            $('#Answer').removeClass('is-invalid');
+        } 
+
+        $.ajax({
+            url: "{% url 'saveAnsKey' %}",
+            type: "POST",
+            data: {
+                Examinationid:Examinationid,
+                ItemNo:ItemNo,
+                Answer:Answer, 
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) { 
+                if (response.isSave == true) { 
+
+                    swal({
+                        title: "Saved!",
+                        text: "Successfully Saved!",
+                        type: "success",
+                        timer: 2000
+                    });
+                    
+                    //$('#tblAnswer tbody').append('<tr><td>'+ record.Item +'</td><td>'+ record.Answer +'</td><td style="text-align:center;"><a class="btn btn-primary btn-xs btnEdit" href="#" title="Edit" data-item="'+record.Item+'" id="btnEdit-'+record.Id+'" data-answer="'+record.Answer+'" onclick="GetDetailsAns('+ record.Id +');"> <i class="fas fa-edit"></i> </a> <button class="btn btn-xs btn-danger btndeleteAns" id="'+ record.Id +'" > <i class="fas fa-trash"></i> </button> </td></tr>')
+                    
+                    $('#tblAnswer tbody').append('<tr><td>'+ItemNo+'</td><td>'+Answer+'</td><td style="text-align:center;"><a class="btn btn-primary btn-xs btnEdit" href="#" title="Edit" data-item="'+response.Item+'" id="btnEdit-'+response.Id+'" data-answer="'+response.Answer+'" onclick="GetDetailsAns('+response.Id+');"> <i class="fas fa-edit"></i> </a> <button class="btn btn-xs btn-danger btndeleteAns" id="'+response.Id+'"> <i class="fas fa-trash"></i> </button> </td></tr>');
+                   /* setTimeout(function() {
+                        location.reload();
+                    }, 1000);*/
+                }
+            }
+        });
+    }
+
+     $(document).on('click', '.btndeleteAns', function(e){
+        var Id = $(this).attr('id');  
+
+        swal({
+            title: "Are you sure you want to delete this record?",
+            text: "ARE YOU SURE YOU WANT TO CONTINUE?",
+            type: "error",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function(isConfirm) {
+            if (isConfirm) {
+
+                $.ajax({
+                    url: `/deleteAnswer/${Id}/`,  
+                    method:"GET", 
+                    success: function(response) { 
+                        if (response.isSave == true) {  
+                            swal({
+                                title: "Deleted!",
+                                text: "Successfully Deleted!",
+                                type: "success",
+                                timer: 2000
+                            });                             
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        }
+                    } 
+                });
+            } else { 
+                swal({
+                    title: "Saved!",
+                    timer:1
+                });
+            }
+        });
+
+    }); 
+
+    $(document).on('click', '.btnDeleteExam', function(e){
+        var Id = $(this).attr('id'); 
+
+        swal({
+            title: "Are you sure you want to delete this record?",
+            text: "ARE YOU SURE YOU WANT TO CONTINUE?",
+            type: "error",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function(isConfirm) {
+            if (isConfirm) {
+
+                $.ajax({
+                    url: `/deleteExam/${Id}/`,  
+                    method:"GET", 
+                    success: function(response) { 
+                        if (response.isSave == true) {  
+                            swal({
+                                title: "Deleted!",
+                                text: "Successfully Deleted!",
+                                type: "success",
+                                timer: 2000
+                            });                             
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        }
+                    } 
+                });
+            } else { 
+                swal({
+                    title: "Saved!",
+                    timer:1
+                });
+            }
+        });
+
+    }); 
+
+</script>
